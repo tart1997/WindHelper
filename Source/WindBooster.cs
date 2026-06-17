@@ -33,6 +33,9 @@ internal class WindBooster : Booster
     private bool wasBoosting = false;
 
     private readonly bool DisableRedirecting;
+    
+    private float BoostDirectionX;
+    private float BoostDirectionY;
 
     public WindBooster(EntityData data, Vector2 offset)
         : base(data.Position + offset, data.Bool("red", false))
@@ -164,7 +167,18 @@ internal class WindBooster : Booster
             }
             else
             {
-                windController.AddWind(new Vector2(Input.MoveX, Input.MoveY).SafeNormalize() * windStrength, 0.15f);
+                BoostDirectionX = Input.MoveX;
+                BoostDirectionY = Input.MoveY;
+                
+                switch (red)
+                {
+                    case true:
+                        windController.AddPermaWind(new Vector2(BoostDirectionX, BoostDirectionY).SafeNormalize() * windStrength);
+                        break;
+                    default:
+                        windController.AddWind(new Vector2(BoostDirectionX, BoostDirectionY).SafeNormalize() * windStrength, 0.15f);
+                        break;
+                }
             }
 
         }
@@ -181,7 +195,11 @@ internal class WindBooster : Booster
             {
                 windController.ChangeControllableWind(windStrength, false);
             }
-            
+            else if (red)
+            {
+                windController.AddPermaWind(new Vector2(-BoostDirectionX, -BoostDirectionY).SafeNormalize() * windStrength);
+            }
+
         }
         wasBoosting = BoostingPlayer;
         spriteFG.Position = sprite.Position;
