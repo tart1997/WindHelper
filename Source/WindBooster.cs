@@ -32,10 +32,13 @@ internal class WindBooster : Booster
 
     private bool wasBoosting = false;
 
+    private readonly bool DisableRedirecting;
+
     public WindBooster(EntityData data, Vector2 offset)
         : base(data.Position + offset, data.Bool("red", false))
     {
         windStrength = data.Float("windStrength", 400f);
+        DisableRedirecting = data.Bool("disableRedirecting");
         Remove(sprite);
         Add(spriteBG = GFX.SpriteBank.Create("Sherplung_WindHelper_windBoosterBG"));
         Add(sprite = GFX.SpriteBank.Create(red ? "boosterRed" : "booster"));
@@ -154,7 +157,16 @@ internal class WindBooster : Booster
                 windController = new ExtendedWindController(Pattern);
                 base.Scene.Add(windController);
             }
-            windController.ChangeControllableWind(windStrength, true);
+
+            if (!DisableRedirecting)
+            {
+                windController.ChangeControllableWind(windStrength, true);
+            }
+            else
+            {
+                windController.AddWind(new Vector2(Input.MoveX, Input.MoveY).SafeNormalize() * windStrength, 0.15f);
+            }
+
         }
         else if (!BoostingPlayer && wasBoosting)
         {
@@ -164,7 +176,12 @@ internal class WindBooster : Booster
                 windController = new ExtendedWindController(Pattern);
                 base.Scene.Add(windController);
             }
-            windController.ChangeControllableWind(windStrength, false);
+            
+            if (!DisableRedirecting)
+            {
+                windController.ChangeControllableWind(windStrength, false);
+            }
+            
         }
         wasBoosting = BoostingPlayer;
         spriteFG.Position = sprite.Position;
