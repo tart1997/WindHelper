@@ -20,27 +20,24 @@ namespace Celeste.Mod.WindHelper.Entities;
 internal class WindBooster : Booster 
 {
 
-    private float windStrength;
+    private readonly float windStrength;
 
-    private Sprite spriteFG;
+    private readonly Sprite spriteFG;
 
-    private Sprite spriteBG;
+    private readonly Sprite spriteBG;
 
-    public WindController.Patterns Pattern;
+    public Patterns Pattern;
 
-    private Level level;
-
-    private bool wasBoosting = false;
+    private bool wasBoosting;
 
     private readonly bool DisableRedirecting;
-    
-    private float BoostDirectionX;
-    private float BoostDirectionY;
+
+    private Vector2 BoostDirection;
 
     private readonly bool OneUse;
 
     public WindBooster(EntityData data, Vector2 offset)
-        : base(data.Position + offset, data.Bool("red", false))
+        : base(data.Position + offset, data.Bool("red"))
     {
         windStrength = data.Float("windStrength", 400f);
         DisableRedirecting = data.Bool("disableRedirecting");
@@ -57,13 +54,15 @@ internal class WindBooster : Booster
         Image image = new Image(GFX.Game["objects/booster/outline"]);
         image.CenterOrigin();
         image.Color = Color.White * 0.75f;
-        outline = new Entity(Position);
-        outline.Depth = 8999;
-        outline.Visible = false;
+        outline = new Entity(Position)
+        {
+            Depth = 8999,
+            Visible = false
+        };
         outline.Add(image);
         outline.Add(new MirrorReflection());
         scene.Add(outline);
-        level = SceneAs<Level>();
+        SceneAs<Level>();
     }
 
     public new void PlayerBoosted(Player player, Vector2 direction)
@@ -77,7 +76,7 @@ internal class WindBooster : Booster
         if (Ch9HubBooster && direction.Y < 0f)
         {
             bool flag = true;
-            List<LockBlock> list = base.Scene.Entities.FindAll<LockBlock>();
+            List<LockBlock> list = Scene.Entities.FindAll<LockBlock>();
             if (list.Count > 0)
             {
                 foreach (LockBlock item in list)
@@ -102,7 +101,7 @@ internal class WindBooster : Booster
             }
         }
         BoostingPlayer = true;
-        base.Tag = (int)Tags.Persistent | (int)Tags.TransitionUpdate;
+        Tag = (int)Tags.Persistent | (int)Tags.TransitionUpdate;
         sprite.Play("spin");
         sprite.FlipX = player.Facing == Facings.Left;
         outline.Visible = true;
@@ -122,7 +121,7 @@ internal class WindBooster : Booster
     }
 
     [MonoModLinkTo("Monocle.Entity", "System.Void Update()")]
-    public void base_Update()
+    private static void base_Update()
     {
     }
 
@@ -158,7 +157,7 @@ internal class WindBooster : Booster
         if (!dashRoutine.Active && respawnTimer <= 0f)
         {
             Vector2 target = Vector2.Zero;
-            Player entity = base.Scene.Tracker.GetEntity<Player>();
+            Player entity = Scene.Tracker.GetEntity<Player>();
             if (entity != null && CollideCheck(entity))
             {
                 target = entity.Center + playerOffset - Position;
@@ -171,29 +170,29 @@ internal class WindBooster : Booster
         }
         if (BoostingPlayer && !wasBoosting)
         {
-            ExtendedWindController windController = base.Scene.Entities.FindFirst<ExtendedWindController>();
+            ExtendedWindController windController = Scene.Entities.FindFirst<ExtendedWindController>();
             if (windController == null)
             {
                 windController = new ExtendedWindController(Pattern);
-                base.Scene.Add(windController);
+                Scene.Add(windController);
             }
 
             if (!DisableRedirecting)
             {
-                windController.ChangeControllableWind(windStrength, true);
+                windController.ChangeControllableWind(windStrength);
             }
             else
             {
-                BoostDirectionX = Input.MoveX;
-                BoostDirectionY = Input.MoveY;
+                Player player  = Scene.Tracker.GetEntity<Player>();
+                BoostDirection = player.CorrectDashPrecision(Input.GetAimVector().SafeNormalize());
                 
                 switch (red)
                 {
                     case true:
-                        windController.AddPermaWind(new Vector2(BoostDirectionX, BoostDirectionY).SafeNormalize() * windStrength);
+                        windController.AddPermaWind(BoostDirection * windStrength);
                         break;
                     default:
-                        windController.AddWind(new Vector2(BoostDirectionX, BoostDirectionY).SafeNormalize() * windStrength, 0.15f);
+                        windController.AddWind(BoostDirection * windStrength, 0.15f);
                         break;
                 }
             }
@@ -201,11 +200,11 @@ internal class WindBooster : Booster
         }
         else if (!BoostingPlayer && wasBoosting)
         {
-            ExtendedWindController windController = base.Scene.Entities.FindFirst<ExtendedWindController>();
+            ExtendedWindController windController = Scene.Entities.FindFirst<ExtendedWindController>();
             if (windController == null)
             {
                 windController = new ExtendedWindController(Pattern);
-                base.Scene.Add(windController);
+                Scene.Add(windController);
             }
             
             if (!DisableRedirecting)
@@ -214,7 +213,7 @@ internal class WindBooster : Booster
             }
             else if (red)
             {
-                windController.AddPermaWind(new Vector2(-BoostDirectionX, -BoostDirectionY).SafeNormalize() * windStrength);
+                windController.AddPermaWind(-BoostDirection * windStrength);
             }
 
         }
