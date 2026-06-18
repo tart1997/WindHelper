@@ -1,16 +1,9 @@
-﻿using Celeste;
-using Celeste.Editor;
-using Celeste.Mod.Entities;
+﻿using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 using Monocle;
 using MonoMod;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using static Celeste.WindController;
 
 namespace Celeste.Mod.WindHelper.Entities;
@@ -62,7 +55,6 @@ internal class WindBooster : Booster
         outline.Add(image);
         outline.Add(new MirrorReflection());
         scene.Add(outline);
-        SceneAs<Level>();
     }
 
     public new void PlayerBoosted(Player player, Vector2 direction)
@@ -121,7 +113,7 @@ internal class WindBooster : Booster
     }
 
     [MonoModLinkTo("Monocle.Entity", "System.Void Update()")]
-    private static void base_Update()
+    public void base_Update()
     {
     }
 
