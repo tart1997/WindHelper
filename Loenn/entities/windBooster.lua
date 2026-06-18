@@ -8,8 +8,9 @@ windBooster.placements = {
         data = {
             red = false,
             windStrength = 1200.0,
+            ch9_hub_booster = false,
 			disableRedirecting = false,
-            ch9_hub_booster = false
+			oneUse = false
         }
     },
     {
@@ -17,8 +18,9 @@ windBooster.placements = {
         data = {
             red = true,
             windStrength = 1200.0,
+			ch9_hub_booster = false,
 			disableRedirecting = false,
-            ch9_hub_booster = false
+			oneUse = false
         }
     }
 }

@@ -37,11 +37,14 @@ internal class WindBooster : Booster
     private float BoostDirectionX;
     private float BoostDirectionY;
 
+    private readonly bool OneUse;
+
     public WindBooster(EntityData data, Vector2 offset)
         : base(data.Position + offset, data.Bool("red", false))
     {
         windStrength = data.Float("windStrength", 400f);
         DisableRedirecting = data.Bool("disableRedirecting");
+        OneUse = data.Bool("oneUse");
         Remove(sprite);
         Add(spriteBG = GFX.SpriteBank.Create("Sherplung_WindHelper_windBoosterBG"));
         Add(sprite = GFX.SpriteBank.Create(red ? "boosterRed" : "booster"));
@@ -125,6 +128,13 @@ internal class WindBooster : Booster
 
     public override void Update()
     {
+        if (OneUse)
+        {
+            outline.RemoveSelf();
+            Remove(light);
+            Remove(bloom);
+        }
+
         base_Update();
         if (cannotUseTimer > 0f)
         {
@@ -135,7 +145,14 @@ internal class WindBooster : Booster
             respawnTimer -= Engine.DeltaTime;
             if (respawnTimer <= 0f)
             {
-                Respawn();
+                if (OneUse)
+                {
+                    RemoveSelf();
+                }
+                else
+                {
+                    Respawn();
+                }
             }
         }
         if (!dashRoutine.Active && respawnTimer <= 0f)

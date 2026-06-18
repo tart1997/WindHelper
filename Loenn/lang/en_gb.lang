@@ -139,6 +139,9 @@ entities.WindHelper/WindBooster.attributes.description.windStrength=Strength of 
 entities.WindHelper/WindBooster.attributes.name.disableRedirecting=Disable Redirecting
 entities.WindHelper/WindBooster.attributes.description.disableRedirecting=Whether or not the player is allowed to influence the wind after boosting.
 
+entities.WindHelper/WindBooster.attributes.name.oneUse=One Use
+entities.WindHelper/WindBooster.attributes.description.oneUse=Makes the booster one use.
+
 
 # --- Triggers ---
 
